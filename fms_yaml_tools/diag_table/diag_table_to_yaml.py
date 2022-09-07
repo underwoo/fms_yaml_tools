@@ -30,15 +30,6 @@ import argparse
 from os import path
 import yaml
 
-#: parse user input
-parser = argparse.ArgumentParser(prog='diag_table_to_yaml', \
-                                 description="converts a legacy ascii diag_table to a yaml diag_table \
-                                              Requires pyyaml (https://pyyaml.org/) \
-                                              More details on the diag_table yaml format can be found in \
-                                              https://github.com/NOAA-GFDL/FMS/tree/main/diag_table")
-parser.add_argument('-f', type=str, help='Name of the ascii diag_table to convert' )
-in_diag_table = parser.parse_args().f
-
 class DiagTable :
 
     def __init__(self, diag_table_file='Diag_Table' ) :
@@ -310,7 +301,20 @@ class DiagTable :
         self.read_diag_table()
         self.parse_diag_table()
 
-#: start
-test_class = DiagTable( diag_table_file=in_diag_table )
-test_class.read_and_parse_diag_table()
-test_class.construct_yaml()
+def main():
+    #: parse user input
+    parser = argparse.ArgumentParser(prog='diag_table_to_yaml', \
+                                     description="converts a legacy ascii diag_table to a yaml diag_table \
+                                                  Requires pyyaml (https://pyyaml.org/) \
+                                                  More details on the diag_table yaml format can be found in \
+                                                  https://github.com/NOAA-GFDL/FMS/tree/main/diag_table")
+    parser.add_argument('-f', type=str, help='Name of the ascii diag_table to convert' )
+    in_diag_table = parser.parse_args().f
+
+    #: start
+    test_class = DiagTable( diag_table_file=in_diag_table )
+    test_class.read_and_parse_diag_table()
+    test_class.construct_yaml()
+
+if __name__ is "__main__":
+    main()

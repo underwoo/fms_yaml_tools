@@ -32,16 +32,6 @@ from collections import OrderedDict
 # Necessary to dump OrderedDict to yaml format
 yaml.add_representer(OrderedDict, lambda dumper, data: dumper.represent_mapping('tag:yaml.org,2002:map', data.items()))
 
-verbose = False
-
-# Identify Field Table Name
-if len(sys.argv) > 1:
-  field_table_name = sys.argv[1]
-else:
-  field_table_name = 'field_table'
-if verbose:
-  print(field_table_name)
-
 class Field:
   """ A Field Object, containing the variable attributes, methods, and subparameters """
   def __init__(self, in_field_type, entry_tuple):
@@ -199,7 +189,20 @@ class FieldYaml:
     self.make_objects()
     self.convert_yaml()
 
-if __name__ == '__main__':
+def main():
+  verbose = False
+
+  # Identify Field Table Name
+  if len(sys.argv) > 1:
+    field_table_name = sys.argv[1]
+  else:
+    field_table_name = 'field_table'
+  if verbose:
+    print(field_table_name)
+
   field_yaml = FieldYaml(field_table_name)
   field_yaml.main()
   field_yaml.writeyaml()
+
+if __name__ == '__main__':
+  main()

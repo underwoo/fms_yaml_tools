@@ -30,15 +30,6 @@ import yaml
 import sys
 import argparse
 
-parser = argparse.ArgumentParser(prog='is_valid_diag_table_yaml', \
-                                 description="Determine if a yaml diag_table is valid. \
-                                              Requires pyyaml (https://pyyaml.org/) \
-                                              More details on the yaml format can be found in \
-                                              https://github.com/NOAA-GFDL/FMS/tree/main/diag_table")
-parser.add_argument('-f', type=str, help='Name of the diag_table yaml to check' )
-
-in_diag_table = parser.parse_args().f
-
 class UniqueKeyLoader(yaml.SafeLoader):
   """ Special loader to check if duplicate keys are present"""
   def construct_mapping(self, node, deep=False):
@@ -191,29 +182,41 @@ def check_for_duplicates(my_list, list_name) :
   if len(set(my_list)) != len(my_list):
     sys.exit('ERROR: Found duplicate ' + list_name )
 
-""" Loop thorugh all the files and field and checks if they are defined correctly"""
-file_names = []
-with open(in_diag_table) as fl:
-  my_table = yaml.load(fl, Loader=UniqueKeyLoader)
-  if 'title' not in my_table : sys.exit('ERROR: title is a required key!')
-  if 'base_date' not in my_table : sys.exit('ERROR: base_date is a required key!')
-  check_date(my_table['base_date'], 'base_date')
+def main():
+  parser = argparse.ArgumentParser(prog='is_valid_diag_table_yaml', \
+                                  description="Determine if a yaml diag_table is valid. \
+                                                Requires pyyaml (https://pyyaml.org/) \
+                                                More details on the yaml format can be found in \
+                                                https://github.com/NOAA-GFDL/FMS/tree/main/diag_table")
+  parser.add_argument('-f', type=str, help='Name of the diag_table yaml to check' )
 
-  diag_files = my_table['diag_files']
-  for i in range(0, len(diag_files)) :
-    diag_file = diag_files[i]
-    check_diag_file(diag_file)
+  in_diag_table = parser.parse_args().f
+  """ Loop thorugh all the files and field and checks if they are defined correctly"""
+  file_names = []
+  with open(in_diag_table) as fl:
+    my_table = yaml.load(fl, Loader=UniqueKeyLoader)
+    if 'title' not in my_table : sys.exit('ERROR: title is a required key!')
+    if 'base_date' not in my_table : sys.exit('ERROR: base_date is a required key!')
+    check_date(my_table['base_date'], 'base_date')
 
-    diag_fields = diag_file['varlist']
-    var_names = []
-    for j in range(0, len(diag_fields)) :
-      diag_field = diag_fields[j]
-      check_diag_field(diag_field, diag_file['file_name'])
-      if "output_name" in diag_field :
-          var_names = var_names + [diag_field['output_name']]
-      else :
-          var_names = var_names + [diag_field['var_name']]
-    check_for_duplicates(var_names, 'var_names in file: ' + diag_file['file_name'])
-    file_names = file_names + [diag_file['file_name']]
-check_for_duplicates(file_names, "file_names")
+    diag_files = my_table['diag_files']
+    for i in range(0, len(diag_files)) :
+      diag_file = diag_files[i]
+      check_diag_file(diag_file)
 
+      diag_fields = diag_file['varlist']
+      var_names = []
+      for j in range(0, len(diag_fields)) :
+        diag_field = diag_fields[j]
+        check_diag_field(diag_field, diag_file['file_name'])
+        if "output_name" in diag_field :
+            var_names = var_names + [diag_field['output_name']]
+        else :
+            var_names = var_names + [diag_field['var_name']]
+      check_for_duplicates(var_names, 'var_names in file: ' + diag_file['file_name'])
+      file_names = file_names + [diag_file['file_name']]
+  check_for_duplicates(file_names, "file_names")
+
+
+if __name__ is "__main__":
+    main()
